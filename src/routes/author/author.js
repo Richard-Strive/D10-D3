@@ -1,8 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Author = require("./schema");
-const { authenticate } = require("../../weapons/AuthTools");
-const { generateJWT } = require("../../weapons/AuthTools");
+const { authenticate, authorization } = require("../../weapons/AuthTools");
 
 const route = express.Router();
 /*
@@ -12,13 +11,31 @@ const route = express.Router();
 
 */
 
-// route.get("/me", authenticate, async (req, res, next) => {
-//   try {
-//     res.status(200).send(req.user);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+route.post("/login", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const author = await Author.findByCredentials(email, password);
+
+    if (!author) throw new Error("YOU NEED TO CREATE A USER");
+
+    const token = await authenticate(author);
+
+    res.status(200).send(token);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+route.get("/me", authorization, async (req, res, next) => {
+  try {
+    res.send(req.author);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 route.post("/", async (req, res, next) => {
   try {
@@ -26,9 +43,9 @@ route.post("/", async (req, res, next) => {
 
     const { _id } = newAuthor;
 
-    const token = await generateJWT({ id: _id });
+    // const token = await generateJWT({ id: _id });
 
-    console.log("---->", token);
+    // console.log("---->", token);
 
     await newAuthor.save();
     res.status(201).send(_id);

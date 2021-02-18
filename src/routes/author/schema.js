@@ -14,10 +14,14 @@ const AuthorSchema = new Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+    required: true,
+  },
 });
 
-AuthorSchema.statics.findByCredentials = async function (username, password) {
-  const newUser = await this.findOne({ username });
+AuthorSchema.statics.findByCredentials = async function (email, password) {
+  const newUser = await this.findOne({ email });
 
   if (newUser) {
     const isMatch = await bcrypt.compare(password, newUser.password);

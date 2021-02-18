@@ -47,6 +47,6 @@ mongoose
       console.log(`Running localhost:${port}`);
     })
   )
-  .catch((err) => conso);
+  .catch((err) => console.log(error));
 
 console.log(listEndpoints(server));
